@@ -13,10 +13,8 @@
         android:theme="@style/Theme.VKKotlinLearning"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.VKKotlinLearning">
+            android:name=".MainActivity" android:theme="@style/Theme.AppCompat.DayNight"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
