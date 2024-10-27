@@ -1,6 +1,6 @@
 package com.example.vk_kotlin_learning
 
-import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,56 +21,43 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableIntState
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.viewmodel.compose.viewModel
 
-class CardScreenFragment(
-    val viewModel: MainViewModel
-): Fragment() {
+class CardScreenFragment(): Fragment() {
 
-    @SuppressLint("StateFlowValueCalledInComposition")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                MainContent()
+                MainScreen()
             }
         }
     }
 
-
-    @Suppress("NonSkippableComposable")
-    @SuppressLint("MutableCollectionMutableState")
-    @Composable
-    private fun MainContent(){
-        val countItems = remember { mutableStateOf(viewModel.cardList.value) }
-        MainScreen(countItems)
-    }
-
-
-    @Suppress("NonSkippableComposable")
     @Composable
     private fun MainScreen(
-        countItems:  MutableState<ArrayList<Int>>
+        viewModel: MainViewModel = viewModel()
     ){
-        Column(modifier = Modifier
+        val cardList by viewModel.cardList.collectAsState()
+
+        Column(
+            modifier = Modifier
             .fillMaxSize()
             .safeContentPadding())
         {
@@ -79,7 +66,7 @@ class CardScreenFragment(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                GenerateItemsList()
+                GenerateItemsList(cardList.size)
             }
 
 
@@ -88,15 +75,15 @@ class CardScreenFragment(
                     .fillMaxWidth()
                     .background(Color.LightGray)
             ) {
-                BottomPanel()
+                BottomPanel(viewModel)
             }
 
         }
     }
 
-    @Suppress("NonSkippableComposable")
     @Composable
     private fun BottomPanel(
+        viewModel: MainViewModel = viewModel()
     ){
         Row{
             Button(
@@ -104,7 +91,7 @@ class CardScreenFragment(
                     .weight(1f)
                     .padding(3.dp),
                 onClick = {
-                    viewModel.AddCard(viewModel.cardList.value.size)
+                    viewModel.addCard(viewModel.cardList.value.size)
                 },
                 colors = ButtonColors(Color.Green, Color.White, Color.Gray, Color.Black)
             ){
@@ -118,22 +105,26 @@ class CardScreenFragment(
         }
     }
 
-    @Suppress("NonSkippableComposable")
     @Composable
-    private fun GenerateItemsList(){
+    private fun GenerateItemsList(
+        currentCardList: Int
+    ){
+        val configuration = LocalConfiguration.current
+        val countGridCells: Int = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+            3
+        else
+            4
 
         LazyVerticalGrid(
-            modifier = Modifier.padding(5.dp, 5.dp, 5.dp),
-            columns = GridCells.Fixed(3)
+            modifier = Modifier.padding(5.dp),
+            columns = GridCells.Fixed(countGridCells)
         ) {
-            items(viewModel.cardList.value.size){
+            items(currentCardList){
                 BoxItem(it)
             }
         }
     }
 
-
-    @Suppress("NonSkippableComposable")
     @Composable
     private fun BoxItem(
         indexItem: Int,
