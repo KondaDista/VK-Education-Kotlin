@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,30 +44,38 @@ class CardScreenFragment(): Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        val fragmentManager = activity?.supportFragmentManager
         return ComposeView(requireContext()).apply {
             setContent {
-                MainScreen()
+                MainScreen({
+                    fragmentManager
+                        ?.beginTransaction()
+                        ?.add(R.id.content, BlueScreen().newInstance(it))
+                        ?.commit()
+                })
             }
         }
     }
 
     @Composable
     private fun MainScreen(
+        onClickCard: (index: Int) -> Unit,
         viewModel: MainViewModel = viewModel()
     ){
         val cardList by viewModel.cardList.collectAsState()
 
         Column(
             modifier = Modifier
-            .fillMaxSize()
-            .safeContentPadding())
+                .fillMaxSize()
+                .safeContentPadding())
         {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                GenerateItemsList(cardList.size)
+                GenerateItemsList(cardList.size, onClickCard)
             }
 
 
@@ -107,7 +116,8 @@ class CardScreenFragment(): Fragment() {
 
     @Composable
     private fun GenerateItemsList(
-        currentCardList: Int
+        currentCardList: Int,
+        onClickCard: (index: Int) -> Unit
     ){
         val configuration = LocalConfiguration.current
         val countGridCells: Int = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
@@ -120,7 +130,7 @@ class CardScreenFragment(): Fragment() {
             columns = GridCells.Fixed(countGridCells)
         ) {
             items(currentCardList){
-                BoxItem(it)
+                BoxItem(it, onClickCard)
             }
         }
     }
@@ -128,6 +138,7 @@ class CardScreenFragment(): Fragment() {
     @Composable
     private fun BoxItem(
         indexItem: Int,
+        onClickCard: (index: Int) -> Unit
     ){
         val colorsEven: Color = if (indexItem % 2 == 0){
             Color.Red
@@ -140,8 +151,12 @@ class CardScreenFragment(): Fragment() {
                 .padding(2.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .aspectRatio(1f)
-                .background(colorsEven),
-            contentAlignment = Alignment.Center
+                .background(colorsEven)
+                .clickable {
+                    onClickCard(indexItem)
+                },
+            contentAlignment = Alignment.Center,
+
         ){
             Text(
                 text = "$indexItem",
