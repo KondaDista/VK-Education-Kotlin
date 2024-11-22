@@ -23,9 +23,7 @@ class BlueScreen: Fragment() {
         }
     }
 
-    companion object
-
-    fun newInstance(indexCard: Int): BlueScreen{
+    companion object fun newInstance(indexCard: Int): BlueScreen{
         val args = Bundle()
         args.putInt("IndexCard", indexCard)
         val fragment = BlueScreen()
