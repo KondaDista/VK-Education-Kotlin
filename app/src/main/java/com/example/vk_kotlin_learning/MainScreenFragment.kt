@@ -16,16 +16,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,8 +41,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -101,6 +104,7 @@ class MainScreenFragment() : Fragment() {
         val gifsList = viewModel.gifsList.collectAsState()
         val loading by viewModel.loading
         val failedRequest by viewModel.failedRequest
+        val failedResponse by viewModel.failedResponse
 
         val countGridCells: Int =
             if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
@@ -108,20 +112,40 @@ class MainScreenFragment() : Fragment() {
             else
                 4
 
-        if (failedRequest && gifsList.value.isEmpty()) {
-            showFailedLoadingScreen()
-        } else {
-            LazyVerticalGrid(
-                modifier = Modifier.padding(5.dp),
-                columns = GridCells.Fixed(countGridCells)
-            ) {
-                itemsIndexed(gifsList.value) { index, gif ->
-                    GifItem(gif)
-                    if (index == gifsList.value.lastIndex && !loading) {
-                        viewModel.loadingGifs()
+        LazyVerticalStaggeredGrid(
+            modifier = Modifier.padding(5.dp),
+            columns = StaggeredGridCells.Fixed(countGridCells)
+        ) {
+            itemsIndexed(gifsList.value) { index, gif ->
+                GifItem(gif)
+                if (index == gifsList.value.lastIndex && !loading) {
+                    viewModel.loadingGifs()
+                    if (failedRequest && !failedResponse){
+                        viewModel.resetFailedRequest()
                     }
                 }
             }
+
+            if (failedRequest) {
+                item(span = StaggeredGridItemSpan.FullLine) {
+                    FailedConnectionItem()
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun FailedConnectionItem(
+    ) {
+        Box(
+            modifier = Modifier
+        ) {
+            Text(
+                text = "Failed to connection",
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .align(Alignment.Center),
+            )
         }
     }
 

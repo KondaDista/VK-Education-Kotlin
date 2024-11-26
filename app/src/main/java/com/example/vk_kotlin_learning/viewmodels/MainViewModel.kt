@@ -24,6 +24,9 @@ class MainViewModel : ViewModel() {
     private var _failedRequest = mutableStateOf(false)
     val failedRequest: State<Boolean> = _failedRequest
 
+    private var _failedResponse = mutableStateOf(false)
+    val failedResponse: State<Boolean> = _failedResponse
+
     private var offset = 0
     private val limit = 25
 
@@ -40,7 +43,6 @@ class MainViewModel : ViewModel() {
     fun loadingGifs() {
         viewModelScope.launch {
             _loading.value = true
-            _failedRequest.value = false
             try {
                 val response = giphyController.requestTrendingGif(
                     count = limit,
@@ -50,15 +52,21 @@ class MainViewModel : ViewModel() {
                 if (response != null) {
                     addGifs(response.body()!!)
                     offset += limit
+                    _failedResponse.value = false
                 } else {
-                    _failedRequest.value = true
+                    _failedResponse.value = true
                 }
             } catch (e: Exception) {
                 _failedRequest.value = true
+                _failedResponse.value = true
             } finally {
                 _loading.value = false
             }
         }
+    }
+
+    fun resetFailedRequest(){
+        _failedRequest.value = false
     }
 
 }
