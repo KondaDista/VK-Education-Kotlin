@@ -2,11 +2,9 @@ package com.example.vk_kotlin_learning
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.vk_kotlin_learning.giphy_api.GiphyController
 
 class MainActivity : AppCompatActivity() {
-
-    private val giphyController by lazy { GiphyController() }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -14,7 +12,7 @@ class MainActivity : AppCompatActivity() {
             return
         supportFragmentManager
             .beginTransaction()
-            .add(R.id.content, MainScreenFragment(giphyController))
+            .add(R.id.content, MainScreenFragment())
             .commit()
     }
 }

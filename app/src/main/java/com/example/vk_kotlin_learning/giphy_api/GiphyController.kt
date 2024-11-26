@@ -1,9 +1,11 @@
-package com.example.vk_kotlin_learning
+package com.example.vk_kotlin_learning.giphy_api
 
+import com.example.vk_kotlin_learning.GifsList
 import retrofit2.Retrofit
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import retrofit2.Response
 
 class GiphyController() {
 
@@ -14,12 +16,12 @@ class GiphyController() {
 
     private val giphyAPI = retrofit.create(GiphyAPI::class.java)
 
-    suspend fun requestTrendingGif(count: Int): GifsList? {
-        val response = giphyAPI.GetTrendingGifs(API, count)
+    suspend fun requestTrendingGif(count: Int, offset: Int): Response<GifsList>? {
+        val response = giphyAPI.GetTrendingGifs(API, count, offset)
         if (response.isSuccessful) {
             val body = response.body()
             if (body != null) {
-                return body
+                return response
             }
         }
         return null
